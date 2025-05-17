@@ -41,8 +41,9 @@ function CameraView({ uploadedClothes }) {
 
         const { canvasWithPoints, fourPoints } = imageProcessor.current.markPointOnShirt(shirtCanvas, shirtCanvas.width, shirtCanvas.height, landmarkData);
 
-        console.log("Cavas point: ", canvasWithPoints)
-        console.log("Four point: ", fourPoints)
+        console.log(`Shirt Canvas Dimension = ${ shirtCanvas.width} x ${ shirtCanvas.height }`);
+        console.log("Cavas point: ", canvasWithPoints);
+        console.log("Four point: ", fourPoints);
 
         const ctx = shirtCanvas.getContext("2d");
         ctx.drawImage(image, 0, 0);
@@ -103,27 +104,39 @@ function CameraView({ uploadedClothes }) {
 
         // Step 2: Pose processing (if needed for alignment later)
         const { pose, flat } = imageProcessor.current.processKeypoint(segmentation);
-        console.log("Pose:", pose);
         console.log("Flat:", flat);
         
         // Step 3: Draw video on offscreen 
         offscreenCtx.drawImage(video, 0, 0, offscreenCanvas.width, offscreenCanvas.height);
 
         // Step 4: Draw BodyPix mask on if screen
-        const opacity = 0.4;
-        const maskBlurAmount = 1;
+        // const opacity = 0.4;
+        // const maskBlurAmount = 1;
 
-        bodyPix.drawMask(
-          offscreenCanvas,
-          video,
-          bodyPix.toColoredPartMask(segmentation),
-          opacity,
-          maskBlurAmount,
-          false
-        );
+        // bodyPix.drawMask(
+        //   offscreenCanvas,
+        //   video,
+        //   bodyPix.toColoredPartMask(segmentation),
+        //   opacity,
+        //   maskBlurAmount,
+        //   false
+        // );
 
         // Step 5: Overlay shirt - will be added later
-        if (imageProcessor.current.shirtCanvas) {
+        if (
+          imageProcessor.current.shirtCanvas &&
+          imageProcessor.current.fourPoints &&
+          flat
+        ) {
+          const shirtOverlay = imageProcessor.current.applyPerspectiveTransform(
+            imageProcessor.current.shirtCanvas,
+            imageProcessor.current.fourPoints, // source points on the shirt
+            flat,                              // destination points on the body
+            offscreenCanvas.width,
+            offscreenCanvas.height
+          );
+
+          offscreenCtx.drawImage(shirtOverlay, 0, 0);
         }
 
         // Show offscreen

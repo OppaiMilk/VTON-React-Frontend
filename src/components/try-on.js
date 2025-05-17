@@ -57,7 +57,6 @@ export class TryOnProcessor {
         // Scale factors for landmark transformation
         const scaleX = drawWidth / uploadWidth;
         const scaleY = drawHeight / uploadHeight;
-
         // Style for landmark points
         ctx.fillStyle = "yellow";
         ctx.strokeStyle = "black";
@@ -96,8 +95,8 @@ export class TryOnProcessor {
         }
 
         console.log("Original landmark:", coords);
-        console.log("Transformed landmark:", selectedIndices);
-        console.log(`Drawwidth: ${ drawWidth } x ${ drawHeight }`)
+        console.log("Transformed landmark:", selectedLandmarks);
+        console.log(`Draw width: ${ drawWidth } x ${ drawHeight }`)
         
         // selectedLandmark
         // [0] top left
@@ -110,42 +109,38 @@ export class TryOnProcessor {
         };
     }
 
-    applyPrespectiveTransform(srcImage, srcPoint, dstPoint, canvas) {
-        // srcPoint = the point of the shirt
-        // dstPoint = the point of the person
-
-        // Function for converting to flat array (OpenCV only take flat array)
+    applyPerspectiveTransform(shirtCanvas, srcPoint, dstPoint, outputWidth, outputHeight) {
         function flattenPointArray(points) {
-        return points.flatMap(pt => [pt.x, pt.y]);
+            return points.flatMap(pt => [pt.x, pt.y]);
         }
 
-        // Flatten array
-        let srcFlat = flattenPointArray(srcPoint);
-        let dstFlat = flattenPointArray(dstPoint)
+        const transformedCanvas = document.createElement("canvas");
+        transformedCanvas.width = outputWidth;
+        transformedCanvas.height = outputHeight;
 
-        // Convert image to cv.Mat
-        let srcMat = cv.matFromArray(4, 1, cv.CV_32FC2, srcFlat);
-        let dstMat = cv.matFromArray(4, 1, cv.CV_32FC2, dstFlat);
+        const srcFlat = flattenPointArray(srcPoint);
+        const dstFlat = flattenPointArray(dstPoint);
 
-        // Convert source image to cv.Mat
-        let src = cv.imread(srcImage); // srcImage must be a canvas ID or HTMLCanvasElement
-        let dst = new cv.Mat();
-        let dsize = new cv.Size(canvas.width, canvas.height); // Define output size
+        const srcMat = cv.matFromArray(4, 1, cv.CV_32FC2, srcFlat);
+        const dstMat = cv.matFromArray(4, 1, cv.CV_32FC2, dstFlat);
 
-        // Get the perspective transform matrix
-        let M = cv.getPerspectiveTransform(srcMat, dstMat);
+        // Read shirtCanvas into OpenCV
+        const src = cv.imread(shirtCanvas); // shirtCanvas is an HTMLCanvasElement
+        const dst = new cv.Mat();
+        const dsize = new cv.Size(outputWidth, outputHeight);
 
-        // Apply warpPrespective
-        cv.warpPerspective(src, dst, M, dsize, cv.INTER_LINEAR, cv.BORDER_CONSTANT, new cv.Scalar());
+        const M = cv.getPerspectiveTransform(srcMat, dstMat);
+        cv.warpPerspective(src, dst, M, dsize, cv.INTER_LINEAR, cv.BORDER_CONSTANT, new cv.Scalar(0, 0, 0, 0));
 
-        // Display result on canvas
-        cv.imshow(canvas, dst); // canvas must be canvas ID or HTMLCanvasElement
+        cv.imshow(transformedCanvas, dst);
 
         // Clean up
         src.delete(); dst.delete(); M.delete(); srcMat.delete(); dstMat.delete();
 
         console.log("srcpoint:", srcFlat);
         console.log("dstpoint:", dstFlat);
-        console.log(`Dimension: ${ canvas.width } x ${ canvas.height }`);
+        console.log(`Dimension: ${ outputWidth } x ${ outputHeight }`);
+
+        return transformedCanvas;
     }
 }
