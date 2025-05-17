@@ -1,0 +1,50 @@
+.apply-section-container {
+  background-color: var(--clr-surface-a10);
+  border: 1px solid var(--clr-primary-a50);
+  border-radius: 12px;
+  padding: 16px;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  display: flex;
+  gap: 12px;
+}
+
+.section-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--clr-primary-a50);
+  margin-bottom: 8px;
+}
+
+.btn {
+  padding: 10px;
+  border: none;
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 14px;
+  gap: 8px;
+}
+
+.apply-btn {
+  background-color: var(--clr-primary-a50);
+  color:var(--clr-surface-a10);
+}
+
+.apply-btn:disabled {
+  background-color: var(--clr-surface-a30);
+  color:var(--clr-primary-a30);
+  cursor: not-allowed;
+}
+
+.reset-btn {
+  background-color: var(--clr-primary-a50);
+  color:var(--clr-surface-a10);
+}
+
+.reset-btn:hover {
+  background-color: var(--clr-primary-a40);
+}

@@ -1,0 +1,204 @@
+/* 📄 styles.css */
+:root {
+  --clr-dark-a0: #000000;
+  --clr-light-a0: #ffffff;
+
+  --clr-primary-a0: #2c8219;
+  --clr-primary-a10: #3a8228;
+  --clr-primary-a20: #468235;
+  --clr-primary-a30: #508241;
+  --clr-primary-a40: #59824c;
+  --clr-primary-a50: #628256;
+
+  --clr-surface-a0: #ffffff;
+  --clr-surface-a10: #f0f0f0;
+  --clr-surface-a20: #e1e1e1;
+  --clr-surface-a30: #d3d3d3;
+  --clr-surface-a40: #c5c5c5;
+  --clr-surface-a50: #b6b6b6;
+
+  --clr-surface-tonal-a0: #ebf2e7;
+  --clr-surface-tonal-a10: #dfe5db;
+  --clr-surface-tonal-a20: #d2d8cf;
+  --clr-surface-tonal-a30: #c6cbc3;
+  --clr-surface-tonal-a40: #babeb8;
+  --clr-surface-tonal-a50: #aeb1ac;
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  width: 100%;
+}
+
+body.dark-theme {
+  --clr-primary-a0: #5ce79a;
+  --clr-primary-a10: #74eaa5;
+  --clr-primary-a20: #89edb0;
+  --clr-primary-a30: #9cf0bb;
+  --clr-primary-a40: #aef3c6;
+  --clr-primary-a50: #bff6d2;
+
+  --clr-surface-a0: #121212;
+  --clr-surface-a10: #282828;
+  --clr-surface-a20: #3f3f3f;
+  --clr-surface-a30: #575757;
+  --clr-surface-a40: #717171;
+  --clr-surface-a50: #8b8b8b;
+
+  --clr-surface-tonal-a0: #1b241e;
+  --clr-surface-tonal-a10: #303933;
+  --clr-surface-tonal-a20: #464e49;
+  --clr-surface-tonal-a30: #5e6560;
+  --clr-surface-tonal-a40: #777d79;
+  --clr-surface-tonal-a50: #919692;
+}
+
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  background-color: var(--clr-surface-a0);
+  color: var(--clr-primary-a50);            
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+
+  transition: background-color 0.3s ease, color 0.3s ease; /* 平滑切换 */
+}
+
+code {
+  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
+    monospace;
+}
+
+.bg-primary {
+  color: var(--clr-primary-a50);
+  background-color: var(--clr-surface-a0);
+  padding: 20px;
+  border-radius: 10px;
+  transition: all 0.3s ease;
+}
+
+.row {
+  display: flex;
+  flex-direction: row;
+  align-items: center;        
+  justify-content: flex-center; 
+  gap: 10vw;                
+}
+
+.row-justify-between {
+  display: flex;
+  flex-direction: row;
+  align-items: center;         
+  justify-content: space-between; 
+  gap: 0;                        
+}
+
+.column {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;     
+  justify-content: flex-start; 
+  gap: 10px;                   
+}
+
+.container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  background-color: var(--clr-surface-a10);
+  border:1px solid var(--clr-primary-a50);
+  border-radius: 8px;
+  padding: 16px;
+  width: 100%;
+  height: 100%;
+}
+
+.image-container{
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 15vw;
+  width: 15vw;
+  border: 1px dashed #ccc;
+  border-radius: 8px;
+  background-color: #f8f8f8;
+  overflow: hidden;
+  position: relative;
+  margin-bottom: 16px;
+}
+
+
+.preview-image {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;   
+}
+
+.no-image-text {
+  color: #999;
+  font-size: 16px;
+  font-weight: 500;
+}
+
+
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 60px;
+  height: 34px;
+}
+
+.switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+
+  background-color: #ccc;
+  transition: background-color 0.4s;
+  border-radius: 34px;
+}
+
+.slider:before {
+  content: "";
+  position: absolute;
+
+  height: 26px;
+  width: 26px;
+  left: 4px;
+  bottom: 4px;
+
+  background: white url("https://i.ibb.co/FxzBYR9/night.png") no-repeat center;
+  background-size: 60%;
+  box-shadow: 0 0px 10px #2020203d;
+
+  transition: transform 0.4s, background 0.4s;
+  border-radius: 50%;
+}
+
+input:checked + .slider {
+  background-color: #2196f3;
+}
+
+input:focus + .slider {
+  box-shadow: 0 0 2px #2196f3;
+}
+
+input:checked + .slider:before {
+  transform: translateX(26px);
+  background: white url("https://i.ibb.co/7JfqXxB/sunny.png") no-repeat center;
+  background-size: 60%;
+}
