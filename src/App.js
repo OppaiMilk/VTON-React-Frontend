@@ -4,8 +4,22 @@ import UploadClothes from "./components/UploadClothes";
 import ApplySection from './components/ApplySection';
 
 function App() {
+  const [cvReady, setCvReady] = useState(false);
   const [uploadedClothes, setUploadedClothes] = useState(null);
   const [isDark, setIsDark] = useState(false);
+
+  useEffect(() => {
+    // Wait for OpenCV to finish loading
+    const checkOpenCV = setInterval(() => {
+      if (window.cv && window.cv.Mat) {
+        window.cv.onRuntimeInitialized = () => {
+          console.log("OpenCV.js is ready");
+          setCvReady(true);
+        };
+        clearInterval(checkOpenCV);
+      }
+    }, 100);
+  }, []);
 
   useEffect(() => {
     document.body.className = isDark ? "dark-theme" : "";
@@ -54,7 +68,7 @@ function App() {
         </div>
 
         <div className="Video">
-          <CameraView  />
+          <CameraView uploadedClothes={uploadedClothes} />
         </div>
       </div>
     </div>

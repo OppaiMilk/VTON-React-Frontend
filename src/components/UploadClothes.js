@@ -10,9 +10,8 @@ function UploadClothes({ onUpload, uploadedClothes }) {
     if (file) {
       const reader = new FileReader();
       reader.onload = () => {
-        const result = { name: file.name, url: reader.result };
-        setPreview(result.url);
-        onUpload(result);
+        setPreview(reader.result);
+        onUpload(file);    
       };
       reader.readAsDataURL(file);
     }
