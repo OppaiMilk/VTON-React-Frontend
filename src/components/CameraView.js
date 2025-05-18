@@ -25,34 +25,53 @@ function CameraView({ uploadedClothes }) {
       image.src = reader.result;
 
       image.onload = () => {
+        // 1. Draw original image to canvas
         const shirtCanvas = document.createElement("canvas");
         shirtCanvas.width = image.width;
         shirtCanvas.height = image.height;
 
-        const landmarkData = {
-          "landmarks": [
-            225, 200, 163, 187, 186, 227, 232, 242, 268, 223,
-            285, 183, 84, 240, 65, 270, 45, 304, 110, 372,
-            118, 345, 116, 316, 119, 326, 119, 404, 121, 507,
-            242, 508, 344, 505, 345, 394, 344, 320, 341, 299,
-            344, 335, 353, 370, 414, 299, 394, 264, 365, 226
-          ]
-        };
-
-        const { canvasWithPoints, fourPoints } = imageProcessor.current.markPointOnShirt(shirtCanvas, shirtCanvas.width, shirtCanvas.height, landmarkData);
-
-        console.log(`Shirt Canvas Dimension = ${ shirtCanvas.width} x ${ shirtCanvas.height }`);
-        console.log("Cavas point: ", canvasWithPoints);
-        console.log("Four point: ", fourPoints);
-
         const ctx = shirtCanvas.getContext("2d");
         ctx.drawImage(image, 0, 0);
 
-        imageProcessor.current.shirtCanvas = shirtCanvas;
-        imageProcessor.current.canvasWithPoints = canvasWithPoints;
-        imageProcessor.current.fourPoints = fourPoints;
+        // 2. Convert to base64
+        const base64String = shirtCanvas.toDataURL("image/png");
 
-        console.log("Clothing image loaded and drawn to shirtCanvas.");
+        // 3. Send to Flask backend
+        fetch("http://localhost:5000/infer", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ image: base64String }),
+        })
+          .then((res) => res.json())
+          .then((data) => {
+            const shirtLandmark = data.landmarks;
+            const segmentedBase64 = data.segmentedImage;
+
+            // Use segmented image in markPointOnShirt
+            const segmentedImage = new Image();
+            segmentedImage.src = segmentedBase64;
+
+            console.log(shirtLandmark)
+
+            segmentedImage.onload = () => {
+              const landmarkData = shirtLandmark;
+
+              const { canvasWithPoints, fourPoints } = imageProcessor.current.markPointOnShirt(
+                segmentedImage,
+                segmentedImage.width,
+                segmentedImage.height,
+                landmarkData
+              );
+
+              imageProcessor.current.canvasWithPoints = canvasWithPoints;
+              imageProcessor.current.fourPoints = fourPoints;
+
+              console.log("Canvas with points created from segmented image.");
+            };
+          })
+          .catch((err) => {
+            console.error("Error sending image to Flask backend: ", err);
+          });
       };
     };
 
@@ -124,12 +143,12 @@ function CameraView({ uploadedClothes }) {
 
         // Step 5: Overlay shirt - will be added later
         if (
-          imageProcessor.current.shirtCanvas &&
+          imageProcessor.current.canvasWithPoints &&
           imageProcessor.current.fourPoints &&
           flat
         ) {
           const shirtOverlay = imageProcessor.current.applyPerspectiveTransform(
-            imageProcessor.current.shirtCanvas,
+            imageProcessor.current.canvasWithPoints,
             imageProcessor.current.fourPoints, // source points on the shirt
             flat,                              // destination points on the body
             offscreenCanvas.width,
@@ -138,6 +157,22 @@ function CameraView({ uploadedClothes }) {
 
           offscreenCtx.drawImage(shirtOverlay, 0, 0);
         }
+
+        // For debugging
+        // if (imageProcessor.current.shirtCanvas) {
+        //   // Just draw the shirtCanvas at top-left corner
+        //   offscreenCtx.drawImage(imageProcessor.current.shirtCanvas, 10, 10);
+
+        //   // Optional: draw a border around it
+        //   offscreenCtx.strokeStyle = "red";
+        //   offscreenCtx.lineWidth = 2;
+        //   offscreenCtx.strokeRect(
+        //     10,
+        //     10,
+        //     imageProcessor.current.shirtCanvas.width,
+        //     imageProcessor.current.shirtCanvas.height
+        //   );
+        // }
 
         // Show offscreen
         const outputCtx = outputCanvas.getContext("2d");

@@ -63,7 +63,7 @@ export class TryOnProcessor {
         ctx.lineWidth = 1;
 
         // Draw landmarks and transform coordinates
-        const coords = landmarkData.landmarks;
+        const coords = landmarkData;
 
         // These are the shirt point refer from DeepFashion2
         const selectedIndices = [6, 14, 16, 24];
