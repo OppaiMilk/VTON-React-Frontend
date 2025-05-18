@@ -59,12 +59,12 @@ function App() {
 
       <div className="bg-primary row" style={{ paddingTop: "0px" }}>
         <div className="bg-primary column">
-          <UploadClothes onUpload={setUploadedClothes} uploadedClothes={uploadedClothes} />
-          <ApplySection
+          <UploadClothes onUpload={setUploadedClothes} uploadedClothes={uploadedClothes} onReset={handleReset}/>
+          {/* <ApplySection
             onApply={handleTryOn}
             onReset={handleReset}
             disabled={!canTryOn}
-          />
+          /> */}
         </div>
 
         <div className="Video">

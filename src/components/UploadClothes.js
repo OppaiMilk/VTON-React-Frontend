@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import "./UploadClothes.css";
 
-function UploadClothes({ onUpload, uploadedClothes }) {
+function UploadClothes({ onUpload, uploadedClothes ,onReset}) {
   const [preview, setPreview] = useState(null);
   const fileInputRef = useRef();
 
@@ -50,6 +50,11 @@ function UploadClothes({ onUpload, uploadedClothes }) {
           ref={fileInputRef}
         />
       </div>
+
+      <button className="btn reset-btn" style={{marginTop:"10px"}} onClick={onReset}>
+        Reset
+      </button>
+      
     </div>
   );
 }

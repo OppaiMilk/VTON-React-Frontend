@@ -8,6 +8,7 @@ function CameraView({ uploadedClothes }) {
   const videoRef = useRef(null);
   const canvasRef = useRef(null);
   const streamRef = useRef(null);
+  const cameraOnRef = useRef(false);
   const imageProcessor = useRef(new TryOnProcessor());
   const [cameraOn, setCameraOn] = useState(false);
   const [net, setNet] = useState(null);
@@ -15,6 +16,14 @@ function CameraView({ uploadedClothes }) {
   useEffect(() => {
     if (!uploadedClothes || !(uploadedClothes instanceof Blob)) {
       console.warn("Invalid uploadedClothes file:", uploadedClothes);
+      imageProcessor.current.canvasWithPoints = null;
+      imageProcessor.current.fourPoints = null;
+
+      if (canvasRef.current) {
+        const ctx = canvasRef.current.getContext("2d");
+        ctx.clearRect(0, 0, canvasRef.current.width, canvasRef.current.height);
+      }
+
       return;
     }
 
@@ -51,17 +60,18 @@ function CameraView({ uploadedClothes }) {
             const segmentedImage = new Image();
             segmentedImage.src = segmentedBase64;
 
-            console.log(shirtLandmark)
+            console.log(shirtLandmark);
 
             segmentedImage.onload = () => {
               const landmarkData = shirtLandmark;
 
-              const { canvasWithPoints, fourPoints } = imageProcessor.current.markPointOnShirt(
-                segmentedImage,
-                segmentedImage.width,
-                segmentedImage.height,
-                landmarkData
-              );
+              const { canvasWithPoints, fourPoints } =
+                imageProcessor.current.markPointOnShirt(
+                  segmentedImage,
+                  segmentedImage.width,
+                  segmentedImage.height,
+                  landmarkData
+                );
 
               imageProcessor.current.canvasWithPoints = canvasWithPoints;
               imageProcessor.current.fourPoints = fourPoints;
@@ -100,6 +110,7 @@ function CameraView({ uploadedClothes }) {
     const draw = async () => {
       if (
         net &&
+        cameraOnRef.current &&
         videoRef.current &&
         canvasRef.current &&
         videoRef.current.readyState === 4
@@ -122,11 +133,18 @@ function CameraView({ uploadedClothes }) {
         });
 
         // Step 2: Pose processing (if needed for alignment later)
-        const { pose, flat } = imageProcessor.current.processKeypoint(segmentation);
+        const { pose, flat } =
+          imageProcessor.current.processKeypoint(segmentation);
         console.log("Flat:", flat);
-        
-        // Step 3: Draw video on offscreen 
-        offscreenCtx.drawImage(video, 0, 0, offscreenCanvas.width, offscreenCanvas.height);
+
+        // Step 3: Draw video on offscreen
+        offscreenCtx.drawImage(
+          video,
+          0,
+          0,
+          offscreenCanvas.width,
+          offscreenCanvas.height
+        );
 
         // Step 4: Draw BodyPix mask on if screen
         // const opacity = 0.4;
@@ -150,7 +168,7 @@ function CameraView({ uploadedClothes }) {
           const shirtOverlay = imageProcessor.current.applyPerspectiveTransform(
             imageProcessor.current.canvasWithPoints,
             imageProcessor.current.fourPoints, // source points on the shirt
-            flat,                              // destination points on the body
+            flat, // destination points on the body
             offscreenCanvas.width,
             offscreenCanvas.height
           );
@@ -178,13 +196,24 @@ function CameraView({ uploadedClothes }) {
         const outputCtx = outputCanvas.getContext("2d");
         outputCtx.clearRect(0, 0, outputCanvas.width, outputCanvas.height);
         outputCtx.drawImage(offscreenCanvas, 0, 0);
+      } else if (!cameraOnRef.current) {
+        if (canvasRef.current) {
+          const ctx = canvasRef.current.getContext("2d");
+          ctx.clearRect(
+            0,
+            0,
+            canvasRef.current.width,
+            canvasRef.current.height
+          );
+        }
+        return;
       }
 
-    animationFrameId = requestAnimationFrame(draw);
-  };
+      animationFrameId = requestAnimationFrame(draw);
+    };
 
     if (cameraOn) {
-      draw();
+      animationFrameId = requestAnimationFrame(draw);
     } else {
       cancelAnimationFrame(animationFrameId);
     }
@@ -208,9 +237,9 @@ function CameraView({ uploadedClothes }) {
 
       streamRef.current = stream;
       setCameraOn(true);
+      cameraOnRef.current = true;
 
       console.log("uploadedClothes inside CameraView:", uploadedClothes);
-
     } catch (error) {
       console.error("Failed to start camera:", error);
     }
@@ -227,21 +256,22 @@ function CameraView({ uploadedClothes }) {
       videoRef.current.pause();
       videoRef.current.srcObject = null;
     }
-
     setCameraOn(false);
+    cameraOnRef.current = false;
+    if (canvasRef.current) {
+      const ctx = canvasRef.current.getContext("2d");
+      ctx.clearRect(0, 0, canvasRef.current.width, canvasRef.current.height);
+    }
+    console.log("Camera stopped.");
+    console.log(cameraOn);
   };
 
   return (
     <div className="video_container">
       <h1 className="section-title">Live Preview with BodyPix</h1>
 
-       {/* Canvas used to display video + segmentation */}
-      <canvas
-        ref={canvasRef}
-        className="canvas-overlay"
-        width="640"
-        height="480"
-      />
+      {/* Canvas used to display video + segmentation */}
+      <canvas ref={canvasRef} className="video" width="640" height="480" />
 
       {/* Hidden video used only for reading frames */}
       <video
@@ -251,7 +281,14 @@ function CameraView({ uploadedClothes }) {
         muted
         width="640"
         height="480"
-        style={{ display: "none" }}
+        style={{
+          position: "absolute",
+          top: 0,
+          left: 0,
+          zIndex: -1,
+          visibility: "hidden",
+          pointerEvents: "none",
+        }}
       />
 
       <div className="control-section">

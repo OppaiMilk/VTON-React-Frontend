@@ -25,19 +25,23 @@
   margin-bottom: 16px;
 }
 
-
-.reset-button {
-  margin-top: 12px;
-  padding: 8px 16px;
-  background-color: var(--clr-primary-a20);
-  color: white;
+.btn {
+  padding: 10px;
   border: none;
   border-radius: 6px;
-  cursor: pointer;
   font-weight: 600;
-  transition: background-color 0.3s ease;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 14px;
+  gap: 8px;
+  width: 15vw;
 }
 
-.reset-button:hover {
+.reset-btn {
+  background-color: var(--clr-primary-a50);
+  color:var(--clr-surface-a10);
+}
+
+.reset-btn:hover {
   background-color: var(--clr-primary-a40);
 }
