@@ -57,6 +57,7 @@ export class TryOnProcessor {
         // Scale factors for landmark transformation
         const scaleX = drawWidth / uploadWidth;
         const scaleY = drawHeight / uploadHeight;
+
         // Style for landmark points
         ctx.fillStyle = "yellow";
         ctx.strokeStyle = "black";
@@ -65,9 +66,27 @@ export class TryOnProcessor {
         // Draw landmarks and transform coordinates
         const coords = landmarkData;
 
-        // These are the shirt point refer from DeepFashion2
-        const selectedIndices = [6, 14, 16, 24];
-        const selectedLandmarks = [];
+        // Helper to get transformed point
+        const getPoint = (index) => ({
+            x: coords[index * 2] * scaleX + offsetX,
+            y: coords[index * 2 + 1] * scaleY + offsetY,
+        });
+
+        // Helper to get midpoint of two indices
+        const midpoint = (index1, index2) => {
+            const p1 = getPoint(index1);
+            const p2 = getPoint(index2);
+            return {
+                x: (p1.x + p2.x) / 2,
+                y: (p1.y + p2.y - 15) / 2
+            };
+        };
+
+        // Points: replace top-left and top-right with midpoints
+        const topLeft     = midpoint(6, 11);  // avg of top-left & bottom-left
+        const bottomLeft  = getPoint(14);
+        const bottomRight = getPoint(16);
+        const topRight    = midpoint(19, 24); // avg of top-right & bottom-right
 
         // for (let i = 0; i < coords.length; i += 2) {
         //   const x = coords[i] * scaleX + offsetX;
@@ -81,18 +100,7 @@ export class TryOnProcessor {
         //   ctx.stroke();
         // }
 
-        for (const index of selectedIndices) {
-            const x = coords[index * 2] * scaleX + offsetX;
-            const y = coords[index * 2 + 1] * scaleY + offsetY;
-
-            selectedLandmarks.push({ x, y });
-
-            // // Draw circle at each selected point
-            // ctx.beginPath();
-            // ctx.arc(x, y, 5, 0, 2 * Math.PI);
-            // ctx.fill();
-            // ctx.stroke();
-        }
+        const selectedLandmarks = [topLeft, bottomLeft, bottomRight, topRight];
 
         console.log("Original landmark:", coords);
         console.log("Transformed landmark:", selectedLandmarks);

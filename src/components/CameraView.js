@@ -82,11 +82,11 @@ function CameraView({ uploadedClothes }) {
   useEffect(() => {
     const loadModel = async () => {
       const loadedNet = await bodyPix.load({
-        architecture: "MobileNetV1",
+        architecture: "ResNet50",
         outputStride: 16,
         multiplier: 1,
         quantBytes: 2,
-        internalResolution: "low",
+        internalResolution: "high",
       });
       setNet(loadedNet);
     };
@@ -117,7 +117,7 @@ function CameraView({ uploadedClothes }) {
         const segmentation = await net.segmentPersonParts(videoRef.current, {
           segmentationThreshold: 0.7,
           flipHorizontal: true,
-          internalResolution: "medium",
+          internalResolution: "high",
           maxDetections: 1,
         });
 

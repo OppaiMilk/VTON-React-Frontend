@@ -101,17 +101,6 @@ def preprocess_image(pil_image):
 
 # Segment result using mask
 def crop_segmented_region(original_img, seg_mask, target_channel=0):
-    """
-    Crops out the region from original_img using the mask from target_channel.
-    
-    Args:
-        original_img: original image (H, W, 3) in RGB
-        seg_mask: predicted segmentation mask (256, 256, 3)
-        target_channel: which channel to extract (e.g., 0 for shirt)
-
-    Returns:
-        Cropped image with only the region of interest (transparent background outside)
-    """
     # Resize seg_mask to match original image size
     orig_height, orig_width = original_img.shape[:2]
     mask = cv2.resize(seg_mask[:, :, target_channel], (orig_width, orig_height))
