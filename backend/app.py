@@ -28,9 +28,9 @@ def infer():
         segmented_url = model_inference.save_segmented_pil(segmented_image)
 
         return jsonify({
-            "segmentation": seg_pred.tolist(),        # convert ndarray to list
-            "landmarks": lm_pred.tolist(),            # convert ndarray to list
-            "segmentedImage": segmented_url           # already base64-encoded string
+            "segmentation": seg_pred.tolist(),
+            "landmarks": lm_pred.tolist(),      
+            "segmentedImage": segmented_url
         })
 
     except Exception as e:
